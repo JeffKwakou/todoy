@@ -1,0 +1,7 @@
+{
+  "name": "todoy-app",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
