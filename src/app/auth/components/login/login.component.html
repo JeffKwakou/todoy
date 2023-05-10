@@ -1,0 +1,23 @@
+<ion-card-header>
+  <ion-card-title>Login</ion-card-title>
+</ion-card-header>
+<ion-card-content>
+  <ion-button type="button" expand="block" (click)="signInWithGoogle()">Sign in with Google</ion-button>
+  <form [formGroup]="loginForm" (ngSubmit)="submit()">
+    <ion-item>
+      <ion-label position="floating">Email</ion-label>
+      <ion-input type="email" formControlName="email"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Password</ion-label>
+      <ion-input type="password" formControlName="password"></ion-input>
+    </ion-item>
+    <ion-button type="submit" [disabled]="loginForm.invalid" expand="block">Sign in</ion-button>
+  </form>
+  <div>
+    <a routerLink="/auth/signup">Don't have an account?</a>
+  </div>
+  <div>
+    <a routerLink="/auth/reset-password">Forgot password?</a>
+  </div>
+</ion-card-content>
