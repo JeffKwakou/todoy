@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { SupabaseService } from 'src/app/shared/services/supabase.service';
 
 @Component({
@@ -10,7 +11,14 @@ import { SupabaseService } from 'src/app/shared/services/supabase.service';
 export class ResetPasswordComponent  implements OnInit {
   protected resetForm: FormGroup = new FormGroup({});
 
-  constructor(private supabaseService: SupabaseService) { }
+  constructor(private supabaseService: SupabaseService, private router: Router) {
+    this.supabaseService.getCurrentUser().subscribe((user) => {
+      if (user) {
+        console.log("User is logged in");
+        this.router.navigate(['/tabs']);
+      }
+    });
+  }
 
   ngOnInit() {
     this.initForm();

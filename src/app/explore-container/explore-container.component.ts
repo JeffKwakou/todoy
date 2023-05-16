@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { SupabaseService } from '../shared/services/supabase.service';
 
 @Component({
   selector: 'app-explore-container',
@@ -8,5 +9,12 @@ import { Component, Input } from '@angular/core';
 export class ExploreContainerComponent {
 
   @Input() name?: string;
+
+  constructor(private supabaseService: SupabaseService) { }
+
+  public signOut(): void {
+    console.log("Sign out");
+    this.supabaseService.signOut();
+  }
 
 }

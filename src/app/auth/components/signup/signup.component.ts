@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { Component } from '@angular/core';
+import { FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { SupabaseService } from 'src/app/shared/services/supabase.service';
 
 @Component({
@@ -7,51 +8,67 @@ import { SupabaseService } from 'src/app/shared/services/supabase.service';
   templateUrl: './signup.component.html',
   styleUrls: ['./signup.component.scss'],
 })
-export class SignupComponent  implements OnInit {
-  protected signupForm: FormGroup = new FormGroup({});
+export class SignupComponent {
   protected isToastOpen: boolean = false;
+  protected toastMessage: string = '';
 
-  constructor(private supabaseService: SupabaseService) { }
+  protected signupForm: FormGroup = this.formBuild.group({
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, this.passwordMatchValidator()]],
+    confirmPassword: ['', [Validators.required, this.passwordMatchValidator()]],
+  });
 
-  ngOnInit() {
-    this.initForm();
+  constructor(private supabaseService: SupabaseService, private formBuild: FormBuilder, private router: Router) {
+    this.supabaseService.getCurrentUser().subscribe((user) => {
+      if (user) {
+        console.log("User is logged in");
+        this.router.navigate(['/tabs']);
+      }
+    });
   }
 
   protected dismissToast(): void {
     this.isToastOpen = false;
+    this.toastMessage = '';
   }
 
-  protected submit(): void {
-    if (this.signupForm.valid) {
-      this.supabaseService.signUp(this.signupForm.get('email')?.value, this.signupForm.get('password')?.value).then((response) => {
-        if (response.error) {
-          console.error(response.error);
-          return;
-        }
+  protected async onSubmit(): Promise<void> {
+    try {
+      const { error } = await this.supabaseService.signUp(this.signupForm.get('email')?.value, this.signupForm.get('password')?.value);
 
-        this.signupForm.reset();
-        this.isToastOpen = true;
-      }).catch((error) => {
-        console.error(error);
-      });
+      if (error) {
+        throw error;
+      }
+
+      this.toastMessage = 'Check your email for the confirmation link.';
+    } catch (error: any) {
+      this.toastMessage = error.message;
+      console.error(error);
+    } finally {
+      this.isToastOpen = true;
+      this.signupForm.reset();
     }
-  }
-
-  private initForm(): void {
-    this.signupForm = new FormGroup({
-      email: new FormControl('', [Validators.required, Validators.email]),
-      password: new FormControl('', [Validators.required, this.passwordMatchValidator()]),
-      confirmPassword: new FormControl('', [Validators.required, this.passwordMatchValidator()]),
-    });
   }
 
   private passwordMatchValidator(): ValidatorFn {
     return (): ValidationErrors | null => {
-      const password = this.signupForm.get('password')?.value;
-      const confirmPassword = this.signupForm.get('confirmPassword')?.value;
+      const password = this.signupForm?.get('password')?.value;
+      const confirmPassword = this.signupForm?.get('confirmPassword')?.value;
 
       return password && confirmPassword && password !== confirmPassword ? { passwordMatch: true } : null;
     };
+  }
+
+  get email() {
+    return this.signupForm.get('email');
+  }
+
+  get password() {
+    return this.signupForm.get('password');
+  }
+
+  get confirmPassword() {
+    return this.signupForm.get('confirmPassword');
   }
 
 }

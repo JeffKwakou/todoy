@@ -2,19 +2,22 @@
   <ion-card-title>Sign up</ion-card-title>
 </ion-card-header>
 <ion-card-content>
-  <form [formGroup]="signupForm" (ngSubmit)="submit()">
+  <form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
     <ion-item>
       <ion-label position="floating">Email</ion-label>
       <ion-input type="email" formControlName="email"></ion-input>
     </ion-item>
+
     <ion-item>
       <ion-label position="floating">Password</ion-label>
       <ion-input type="password" formControlName="password"></ion-input>
     </ion-item>
+
     <ion-item>
       <ion-label position="floating">Confirm password</ion-label>
       <ion-input type="password" formControlName="confirmPassword"></ion-input>
     </ion-item>
+
     <ion-button type="submit" [disabled]="signupForm.invalid" expand="block">Sign up</ion-button>
   </form>
   <div>
@@ -24,7 +27,7 @@
 
 <ion-toast
     [isOpen]="isToastOpen"
-    message="Signed up successfully!"
-    [duration]="3000"
+    [message]="toastMessage"
+    [duration]="5000"
     (didDismiss)="dismissToast()"
   ></ion-toast>

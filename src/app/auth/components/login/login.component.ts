@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { Component } from '@angular/core';
+import { FormGroup, Validators, FormBuilder } from '@angular/forms';
+import { Router } from '@angular/router';
 import { SupabaseService } from 'src/app/shared/services/supabase.service';
 
 @Component({
@@ -7,30 +8,56 @@ import { SupabaseService } from 'src/app/shared/services/supabase.service';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })
-export class LoginComponent  implements OnInit {
-  protected loginForm: FormGroup = new FormGroup({});
+export class LoginComponent {
+  protected loginForm: FormGroup = this.formBuilder.group({
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required]]
+  });
 
-  constructor(private supabaseService: SupabaseService) { }
-
-  ngOnInit() {
-    this.initForm();
+  constructor(private supabaseService: SupabaseService, private formBuilder: FormBuilder, private router: Router) {
+    this.supabaseService.getCurrentUser().subscribe((user) => {
+      if (user) {
+        console.log("User is logged in");
+        this.router.navigateByUrl('/tabs', { replaceUrl: true });
+      }
+    });
   }
 
-  protected submit(): void {
-    if (this.loginForm.valid) {
-      this.supabaseService.signInWithEmail(this.loginForm.get('email')?.value, this.loginForm.get('password')?.value);
+  protected async onSubmit(): Promise<void> {
+    try {
+      const { error } = await this.supabaseService.signInWithEmail(this.loginForm.get('email')?.value, this.loginForm.get('password')?.value);
+
+      if (error) {
+        throw error;
+      }
+
+      this.router.navigateByUrl('/tabs', { replaceUrl: true });
+    } catch (error: any) {
+      console.error(error);
     }
   }
 
-  protected signInWithGoogle(): void {
-    this.supabaseService.signInWithGoogle();
+  protected async signInWithGoogle(): Promise<void> {
+    try {
+      const { error } = await this.supabaseService.signInWithGoogle();
+
+      if (error) {
+        throw error;
+      }
+
+      this.router.navigateByUrl('/tabs', { replaceUrl: true });
+    } catch (error: any) {
+      console.log("banzaeia a")
+      console.error(error);
+    }
   }
 
-  private initForm(): void {
-    this.loginForm = new FormGroup({
-      email: new FormControl('', [Validators.required, Validators.email]),
-      password: new FormControl('', [Validators.required])
-    });
+  get email() {
+    return this.loginForm.get('email');
+  }
+
+  get password() {
+    return this.loginForm.get('password');
   }
 
 }
